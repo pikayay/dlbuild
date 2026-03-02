@@ -76,3 +76,27 @@ To deploy this application, you will need to:
 ## Troubleshooting
 
 - **`npx supabase start` fails**: Ensure Docker is running and that no other services are using the ports required by Supabase. You can try stopping all running Docker containers with `docker stop $(docker ps -aq)`.
+
+## Testing
+
+This project uses [Vitest](https://vitest.dev/) for unit and component testing. The tests are located alongside the files they test and have a `.test.ts` or `.test.tsx` extension.
+
+### Running Tests
+
+To run the tests, use the following command:
+
+```bash
+npm test
+```
+
+To run the tests in watch mode with a UI, use:
+
+```bash
+npm run test:ui
+```
+
+### Writing Tests
+
+-   **Component Tests**: For React components, we use `@testing-library/react`. Create a `[component-name].test.tsx` file in the same directory as the component.
+-   **Utility Function Tests**: For utility functions, create a `[function-name].test.ts` file.
+-   **Mocks**: When testing components that rely on Next.js features (like `useRouter`) or external clients (like Supabase), make sure to mock them in your test files. You can see examples in `app/components/SignInForm.test.tsx` and `app/components/SignOutButton.test.tsx`.
