@@ -24,7 +24,6 @@ export default function ProfileForm({ user, profile }: { user: User; profile: Pr
       id: user.id,
       full_name: fullName,
       avatar_url: avatarUrl,
-      updated_at: new Date().toISOString(),
     })
 
     if (error) {

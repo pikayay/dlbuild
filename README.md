@@ -73,6 +73,20 @@ To deploy this application, you will need to:
 3.  Push the database migrations: `npx supabase db push`
 4.  Configure the environment variables in your hosting provider's settings (e.g., Vercel, Netlify).
 
+## CI/CD
+
+### GitHub Actions for Migrations
+
+This project includes a GitHub Actions workflow (`.github/workflows/production_migrations.yml`) that automatically runs database migrations when code is pushed to the `main` branch.
+
+To get this working, you must configure the following secrets in your GitHub repository's settings (`Settings > Secrets and variables > Actions`):
+
+-   `PROJECT_REF`: The reference ID of your production Supabase project.
+-   `SUPABASE_ACCESS_TOKEN`: Your Supabase personal access token.
+-   `SUPABASE_DB_PASSWORD`: The password for your production Supabase database.
+
+These secrets are used by the workflow to securely connect to your Supabase project and apply any pending migrations.
+
 ## Troubleshooting
 
 - **`npx supabase start` fails**: Ensure Docker is running and that no other services are using the ports required by Supabase. You can try stopping all running Docker containers with `docker stop $(docker ps -aq)`.
