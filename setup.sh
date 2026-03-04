@@ -18,8 +18,8 @@ fi
 # 3. Get Supabase credentials
 echo "Getting Supabase credentials..."
 OUTPUT=$(npx supabase status)
-URL=$(echo "$OUTPUT" | grep "Project URL" | awk '{print $4}')
-ANON_KEY=$(echo "$OUTPUT" | grep "Publishable" | awk '{print $4}')
+URL=$(echo "$OUTPUT" | grep "Project URL" | sed -E 's/.*Project URL[[:space:]]*│[[:space:]]*//;s/[[:space:]]*│$//')
+ANON_KEY=$(echo "$OUTPUT" | grep "Publishable" | sed -E 's/.*Publishable[[:space:]]*│[[:space:]]*//;s/[[:space:]]*│$//')
 
 if [ -z "$URL" ] || [ -z "$ANON_KEY" ]; then
   echo "Error: Could not find Supabase URL or anon key."
@@ -30,14 +30,10 @@ fi
 ENV_FILE=".env.local"
 echo "Creating/updating $ENV_FILE file..."
 
-if [ -f "$ENV_FILE" ]; then
-    # Remove existing supabase variables
-    sed -i '/NEXT_PUBLIC_SUPABASE_URL/d' $ENV_FILE
-    sed -i '/NEXT_PUBLIC_SUPABASE_ANON_KEY/d' $ENV_FILE
-fi
-
-echo "NEXT_PUBLIC_SUPABASE_URL=$URL" >> $ENV_FILE
-echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY" >> $ENV_FILE
+cat <<EOF > $ENV_FILE
+NEXT_PUBLIC_SUPABASE_URL=$URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY
+EOF
 
 
 # 5. Run database migrations
