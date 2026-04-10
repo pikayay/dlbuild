@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added individual hero detail pages at `/deadlock/heroes/[heroSlug]` showing portrait, tags, overview, playstyle, and lore.
+- Updated the Heroes catalog to link to the new hero detail pages.
 - Added the Deadlock Minimap page at `/deadlock/minimap`.
 - Created the Deadlock app, a build-crafting app for the game Deadlock.
 - Created `items`, `builds`, and `heroes` pages.

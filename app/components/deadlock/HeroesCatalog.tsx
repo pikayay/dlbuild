@@ -1,5 +1,7 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { getHeroPortraitUrl, type HeroV2 } from '@/lib/deadlock-api'
+import { heroDetailHref } from '@/lib/deadlock-hero-slug'
 
 function heroTypeBadgeClass(heroType: string | null | undefined): string {
   const t = (heroType ?? '').toLowerCase()
@@ -36,9 +38,14 @@ function HeroCard({ hero }: { hero: HeroV2 }) {
   const role = hero.description?.role?.trim()
   const playstyle = hero.description?.playstyle?.trim()
   const tags = (hero.tags ?? []).slice(0, 4)
+  const href = heroDetailHref(hero.name)
 
   return (
-    <li className="flex gap-4 rounded-xl border border-zinc-200 bg-white p-4 text-left shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80">
+    <li className="flex rounded-xl border border-zinc-200 bg-white text-left shadow-sm transition-shadow hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900/80">
+      <Link
+        href={href}
+        className="flex w-full gap-4 p-4 outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-violet-500 dark:ring-offset-zinc-950"
+      >
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-600">
         {portrait ? (
           <Image
@@ -101,6 +108,7 @@ function HeroCard({ hero }: { hero: HeroV2 }) {
           )}
         </div>
       </div>
+      </Link>
     </li>
   )
 }

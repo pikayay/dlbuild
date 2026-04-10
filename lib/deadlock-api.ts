@@ -325,6 +325,41 @@ export const getHeroesFromApiCached = cache(
   },
 )
 
+export interface HeroBySlugResult {
+  hero: HeroV2 | null
+  error: string | null
+}
+
+/** Resolve a single hero from the display-name URL slug (e.g. `infernus`). */
+export async function getHeroBySlug(
+  slug: string,
+): Promise<HeroBySlugResult> {
+  const decoded = decodeURIComponent(slug).trim()
+  // Inline implementation of heroDisplayNameToSlug logic to avoid cyclic dependency if any, or import it. 
+  // Actually, I'll import it at the top of the file in another replacement or inline here.
+  const normalized = decoded
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+
+  const { heroes, error } = await getHeroesFromApiCached()
+  if (error) return { hero: null, error }
+
+  const hero =
+    heroes.find((h) => {
+      const hSlug = h.name
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+      return hSlug === normalized
+    }) ?? null
+  return { hero, error: null }
+}
+
 /**
  * Playable roster: selectable in-game and not disabled (matches typical PvP lineup).
  */
