@@ -25,6 +25,9 @@ export default async function Home() {
               <Link href="/deadlock/heroes" className="text-blue-500 hover:underline">
                 Heroes
               </Link>
+              <Link href="/profile" className="text-blue-500 hover:underline">
+                Profile
+              </Link>
               <SignOutButton />
             </div>
           ) : (

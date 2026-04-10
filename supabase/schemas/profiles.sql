@@ -6,6 +6,7 @@ create table public.profiles (
   email text,
   full_name text,
   avatar_url text,
+  bio text,
   updated_at timestamp with time zone,
   primary key (id)
 );

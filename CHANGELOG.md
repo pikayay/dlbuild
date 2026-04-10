@@ -35,3 +35,5 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - sign up, sign in, and sign out functionality.
+- items page displaying all items in groups and subgroups, with links to item-specific pages.
+- heroes page displaying all heroes 
