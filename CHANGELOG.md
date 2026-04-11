@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Placeholder API helpers for builds and heroes in `lib/deadlock-api.ts` (unchanged behavior).
 
 ### Changed
+- Reworked the home page (`app/page.tsx`) to look nicer, match the style of other pages, and use `title-screen.jpg` as the background.
 - Items page lists all API items in a grid with name, internal class name, type badge, optional description snippet, and upgrade-only fields (cost, slot, tier, shopable). Fetches use `cache: 'no-store'` because the full items payload exceeds Next.js’s fetch data cache size limit, so the route is dynamically rendered.
 - Updated the homepage to be more relevant to the Deadlock app.
 - Updated the middleware to redirect unauthenticated users to the homepage.
