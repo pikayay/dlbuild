@@ -1,8 +1,9 @@
-import { getBuilds, Build } from '@/lib/deadlock-api'
+import { fetchBuilds } from './actions'
+import { Build } from '@/lib/deadlock-api'
 import Link from 'next/link'
 
 export default async function BuildsPage() {
-  const builds = await getBuilds()
+  const builds = await fetchBuilds()
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
@@ -23,6 +24,9 @@ export default async function BuildsPage() {
             <li key={build.id} className="p-4 border rounded-lg">
               <h2 className="text-xl font-bold">{build.name}</h2>
               <p>{build.description}</p>
+              <div className="mt-2 text-xs font-semibold text-zinc-500">
+                {build.published ? 'Published' : 'Draft'}
+              </div>
             </li>
           ))}
         </ul>

@@ -76,8 +76,14 @@ export interface ItemsFetchResult {
 
 export interface Build {
   id: string
+  created_at: string
+  updated_at: string
+  user_id: string
+  hero_id: number
   name: string
   description: string
+  items: Record<string, UpgradeItemV2[]>
+  published: boolean
 }
 
 /** Hero roster entry from `GET /v2/heroes` (Assets API). */
@@ -268,14 +274,6 @@ export function getUpgradeDescriptionBlocks(
   push('Passive', d.passive)
   push('Active', d.active)
   return blocks
-}
-
-export async function getBuilds(): Promise<Build[]> {
-  return [
-    { id: '1', name: 'Build 1', description: 'This is the first build.' },
-    { id: '2', name: 'Build 2', description: 'This is the second build.' },
-    { id: '3', name: 'Build 3', description: 'This is the third build.' },
-  ]
 }
 
 export function getHeroPortraitUrl(hero: HeroV2): string | null {

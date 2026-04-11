@@ -1,5 +1,5 @@
 import { BuildCreator } from '@/app/components/deadlock/BuildCreator'
-import { getItems } from '@/lib/deadlock-api'
+import { getItems, getHeroes } from '@/lib/deadlock-api'
 import Link from 'next/link'
 
 export const metadata = {
@@ -7,7 +7,8 @@ export const metadata = {
 }
 
 export default async function NewBuildPage() {
-  const { items, error } = await getItems()
+  const [{ items, error: itemsError }, { heroes, error: heroesError }] = await Promise.all([getItems(), getHeroes()])
+  const error = itemsError || heroesError
 
   return (
     <div className="mx-auto max-w-5xl w-full">
@@ -32,13 +33,13 @@ export default async function NewBuildPage() {
           className="mb-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-900 dark:border-red-800 dark:bg-red-950/40 dark:text-red-100"
           role="alert"
         >
-          <p className="font-medium">Could not load items</p>
+          <p className="font-medium">Could not load items or heroes</p>
           <p className="mt-1 text-sm">{error}</p>
         </div>
       ) : items.length === 0 ? (
         <p className="text-center text-zinc-500">No items returned.</p>
       ) : (
-        <BuildCreator items={items} />
+        <BuildCreator items={items} heroes={heroes} />
       )}
     </div>
   )

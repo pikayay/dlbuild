@@ -58,6 +58,9 @@ export default async function Home() {
           ) : (
             <div className="flex flex-col items-center gap-4 w-full">
               <p className="text-zinc-300 text-lg">Please sign in to continue.</p>
+              <Link href="/login" className="w-full text-center px-4 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all shadow-md">
+                Sign In
+              </Link>
             </div>
           )}
         </div>

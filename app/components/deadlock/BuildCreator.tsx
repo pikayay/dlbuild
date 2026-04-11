@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { UpgradeItemV2, getItemImageUrl, getItemDescriptionSnippet } from '@/lib/deadlock-api'
+import { UpgradeItemV2, HeroV2, getItemImageUrl, getItemDescriptionSnippet } from '@/lib/deadlock-api'
+import { createBuild } from '@/app/(main)/deadlock/builds/actions'
 import {
   buildSlotCostCatalog,
   resolveSlotTheme,
@@ -410,11 +412,18 @@ function SelectableItemCard({ item, onClick }: { item: UpgradeItemV2; onClick: (
   )
 }
 
-export function BuildCreator({ items }: { items: UpgradeItemV2[] }) {
+export function BuildCreator({ items, heroes }: { items: UpgradeItemV2[], heroes: HeroV2[] }) {
+  const router = useRouter()
   const [activeSectionId, setActiveSectionId] = useState<string>(BUILD_SECTIONS[0].id)
   const [buildItems, setBuildItems] = useState<Record<string, UpgradeItemV2[]>>(
     BUILD_SECTIONS.reduce((acc, sec) => ({ ...acc, [sec.id]: [] }), {})
   )
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [heroId, setHeroId] = useState<number | ''>('')
+  const [published, setPublished] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleAddItem = (item: UpgradeItemV2) => {
     setBuildItems((prev) => ({
@@ -430,13 +439,116 @@ export function BuildCreator({ items }: { items: UpgradeItemV2[] }) {
     }))
   }
 
+  const handleSave = async () => {
+    if (!name.trim()) {
+      setError('Please provide a name for your build.')
+      return
+    }
+    if (heroId === '') {
+      setError('Please select a hero.')
+      return
+    }
+
+    setIsSaving(true)
+    setError(null)
+
+    const result = await createBuild({
+      hero_id: heroId,
+      name,
+      description,
+      items: buildItems,
+      published,
+    })
+
+    if (result.error) {
+      setError(result.error)
+      setIsSaving(false)
+    } else {
+      router.push('/deadlock/builds')
+    }
+  }
+
   const catalog = buildSlotCostCatalog(items)
 
   return (
     <div className="flex flex-col gap-8 w-full">
-      {/* Build UI (Top) */}
+      {/* Build Info Form */}
       <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50">
-        <h2 className="mb-4 text-2xl font-bold text-zinc-900 dark:text-zinc-50">Your Build</h2>
+        <h2 className="mb-4 text-2xl font-bold text-zinc-900 dark:text-zinc-50">Build Information</h2>
+        
+        {error && (
+          <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200">
+            {error}
+          </div>
+        )}
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="build-name" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Name</label>
+            <input
+              id="build-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Unkillable Infernus"
+              className="rounded-md border border-zinc-300 px-3 py-2 shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            />
+          </div>
+          
+          <div className="flex flex-col gap-2">
+            <label htmlFor="build-hero" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Hero</label>
+            <select
+              id="build-hero"
+              value={heroId}
+              onChange={(e) => setHeroId(e.target.value === '' ? '' : Number(e.target.value))}
+              className="rounded-md border border-zinc-300 px-3 py-2 shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            >
+              <option value="">Select a hero...</option>
+              {heroes.map((hero) => (
+                <option key={hero.id} value={hero.id}>
+                  {hero.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="sm:col-span-2 flex flex-col gap-2">
+            <label htmlFor="build-desc" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Description</label>
+            <textarea
+              id="build-desc"
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Explain how to play this build..."
+              className="rounded-md border border-zinc-300 px-3 py-2 shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            />
+          </div>
+
+          <div className="sm:col-span-2 flex items-center gap-2">
+            <input
+              id="build-published"
+              type="checkbox"
+              checked={published}
+              onChange={(e) => setPublished(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 text-violet-600 focus:ring-violet-600 dark:border-zinc-700 dark:bg-zinc-950 dark:ring-offset-zinc-950"
+            />
+            <label htmlFor="build-published" className="text-sm text-zinc-700 dark:text-zinc-300">Publish this build (visible to others)</label>
+          </div>
+        </div>
+      </div>
+
+      {/* Build UI (Middle) */}
+      <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Your Build</h2>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSaving ? 'Saving...' : 'Save Build'}
+          </button>
+        </div>
         <div className="flex flex-col gap-4">
           {BUILD_SECTIONS.map((section) => {
             const isActive = activeSectionId === section.id
