@@ -46,6 +46,7 @@ export interface DeadlockItemBase {
 export interface AbilityItemV2 extends DeadlockItemBase {
   type: 'ability'
   description: AbilityDescriptionV2
+  upgrades?: Record<string, unknown>[]
 }
 
 export interface WeaponItemV2 extends DeadlockItemBase {
@@ -100,6 +101,25 @@ export interface HeroImagesV2 {
   icon_image_small_webp?: string | null
 }
 
+export interface HeroStartingStats {
+  max_health?: { value: number; display_stat_name: string }
+  weapon_power?: { value: number; display_stat_name: string }
+  reload_speed?: { value: number; display_stat_name: string }
+  move_acceleration?: { value: number; display_stat_name: string }
+  tech_armor_damage_reduction?: { value: number; display_stat_name: string }
+  [key: string]: { value: number; display_stat_name: string } | undefined
+}
+
+export interface HeroItems {
+  weapon_primary?: string
+  weapon_melee?: string
+  signature1?: string
+  signature2?: string
+  signature3?: string
+  signature4?: string
+  [key: string]: string | undefined
+}
+
 export interface HeroV2 {
   id: number
   class_name: string
@@ -113,6 +133,8 @@ export interface HeroV2 {
   hero_type?: string | null
   complexity?: number
   images: HeroImagesV2
+  starting_stats?: HeroStartingStats
+  items?: HeroItems
 }
 
 export interface HeroesFetchResult {
@@ -369,4 +391,107 @@ export async function getHeroes(): Promise<HeroesFetchResult> {
   playable.sort((a, b) => a.name.localeCompare(b.name))
 
   return { heroes: playable, error: null }
+}
+
+export const getAbilitiesFromApiCached = cache(
+  async (): Promise<{ abilities: AbilityItemV2[]; error: string | null }> => {
+    const url = new URL(`${ASSETS_API_BASE}/v2/items/by-type/ability`)
+    url.searchParams.set('language', DEFAULT_LANGUAGE)
+
+    try {
+      const res = await fetch(url.toString(), {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      })
+
+      if (!res.ok) {
+        return {
+          abilities: [],
+          error: `Deadlock API returned ${res.status} ${res.statusText}`,
+        }
+      }
+
+      const data: unknown = await res.json()
+      if (!Array.isArray(data)) {
+        return { abilities: [], error: 'Unexpected response from Deadlock API' }
+      }
+
+      return { abilities: data as AbilityItemV2[], error: null }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Unknown error'
+      return {
+        abilities: [],
+        error: `Could not load abilities: ${message}`,
+      }
+    }
+  },
+)
+
+export const getWeaponsFromApiCached = cache(
+  async (): Promise<{ weapons: WeaponItemV2[]; error: string | null }> => {
+    const url = new URL(`${ASSETS_API_BASE}/v2/items/by-type/weapon`)
+    url.searchParams.set('language', DEFAULT_LANGUAGE)
+
+    try {
+      const res = await fetch(url.toString(), {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      })
+
+      if (!res.ok) {
+        return {
+          weapons: [],
+          error: `Deadlock API returned ${res.status} ${res.statusText}`,
+        }
+      }
+
+      const data: unknown = await res.json()
+      if (!Array.isArray(data)) {
+        return { weapons: [], error: 'Unexpected response from Deadlock API' }
+      }
+
+      return { weapons: data as WeaponItemV2[], error: null }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Unknown error'
+      return {
+        weapons: [],
+        error: `Could not load weapons: ${message}`,
+      }
+    }
+  },
+)
+
+export async function getHeroAbilities(hero: HeroV2): Promise<{ abilities: AbilityItemV2[], error: string | null }> {
+  const { abilities, error } = await getAbilitiesFromApiCached()
+  if (error) return { abilities: [], error }
+
+  const heroAbilities = []
+  if (hero.items) {
+    const sigKeys = ['signature1', 'signature2', 'signature3', 'signature4']
+    for (const key of sigKeys) {
+      const className = hero.items[key]
+      if (className) {
+        const ability = abilities.find(a => a.class_name === className)
+        if (ability) heroAbilities.push(ability)
+      }
+    }
+  } else {
+    // Fallback if hero.items is missing but abilities have heroes array
+    const fallback = abilities.filter(a => a.heroes && a.heroes.includes(hero.id))
+    heroAbilities.push(...fallback.slice(0, 4))
+  }
+  
+  return { abilities: heroAbilities, error: null }
+}
+
+export async function getHeroWeapon(hero: HeroV2): Promise<{ weapon: WeaponItemV2 | null, error: string | null }> {
+  const { weapons, error } = await getWeaponsFromApiCached()
+  if (error) return { weapon: null, error }
+
+  if (hero.items && hero.items.weapon_primary) {
+    const weapon = weapons.find(w => w.class_name === hero.items?.weapon_primary)
+    return { weapon: weapon || null, error: null }
+  }
+  
+  return { weapon: null, error: null }
 }

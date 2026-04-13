@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getHeroBySlug, getHeroPortraitUrl } from '@/lib/deadlock-api'
+import { getHeroBySlug, getHeroPortraitUrl, getHeroAbilities } from '@/lib/deadlock-api'
 import { heroDetailHref } from '@/lib/deadlock-hero-slug'
 
 type PageProps = {
@@ -78,6 +78,12 @@ export default async function HeroDetailPage({ params }: PageProps) {
     notFound()
   }
 
+  const [
+    { abilities }
+  ] = await Promise.all([
+    getHeroAbilities(hero)
+  ])
+
   const portrait = getHeroPortraitUrl(hero)
   const role = hero.description?.role?.trim()
   const playstyle = hero.description?.playstyle?.trim()
@@ -144,6 +150,70 @@ export default async function HeroDetailPage({ params }: PageProps) {
         </div>
       </header>
 
+      {hero.starting_stats && (
+        <section className="mt-8 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900/60">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Base Stats</h2>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              { label: 'Health', value: hero.starting_stats.max_health?.value },
+              { label: 'Move Speed', value: hero.starting_stats.max_move_speed?.value ? `${hero.starting_stats.max_move_speed.value}m/s` : null },
+              { label: 'Sprint Speed', value: hero.starting_stats.sprint_speed?.value ? `+${hero.starting_stats.sprint_speed.value}m/s` : null },
+              { label: 'Light Melee', value: hero.starting_stats.light_melee_damage?.value },
+              { label: 'Heavy Melee', value: hero.starting_stats.heavy_melee_damage?.value },
+              { label: 'Reload', value: hero.starting_stats.reload_speed?.value ? `${hero.starting_stats.reload_speed.value}s` : null },
+              { label: 'Spirit Resist', value: hero.starting_stats.tech_armor_damage_reduction?.value ? `${hero.starting_stats.tech_armor_damage_reduction.value}%` : null },
+              { label: 'Bullet Resist', value: hero.starting_stats.bullet_armor_damage_reduction?.value ? `${hero.starting_stats.bullet_armor_damage_reduction.value}%` : null },
+            ].map(stat => stat.value != null ? (
+              <div key={stat.label} className="flex flex-col bg-zinc-50 dark:bg-zinc-800 p-3 rounded-lg border border-zinc-100 dark:border-zinc-700">
+                <span className="text-xs text-zinc-500 font-medium uppercase">{stat.label}</span>
+                <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{stat.value}</span>
+              </div>
+            ) : null)}
+          </div>
+        </section>
+      )}
+
+      {abilities && abilities.length > 0 && (
+        <section className="mt-8 space-y-6 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900/60">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Abilities</h2>
+          <div className="flex flex-col gap-6">
+            {abilities.map((ability) => (
+              <div key={ability.id} className="flex flex-col sm:flex-row gap-4 p-4 border rounded-lg bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/50">
+                <div className="w-16 h-16 shrink-0 relative rounded-md overflow-hidden bg-black/50 border border-zinc-300 dark:border-zinc-600">
+                  {(ability.image_webp || ability.image) && (
+                    <Image
+                      src={ability.image_webp || ability.image || ''}
+                      alt={ability.name}
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                    />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{ability.name}</h3>
+                  {ability.description?.desc && (
+                    <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300" dangerouslySetInnerHTML={{ __html: ability.description.desc }} />
+                  )}
+                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                    {['t1_desc', 't2_desc', 't3_desc'].map((tier, i) => {
+                      const desc = ability.description?.[tier as keyof typeof ability.description]
+                      if (!desc) return null
+                      return (
+                        <div key={tier} className="bg-zinc-200/50 dark:bg-zinc-950/50 p-2 rounded-md text-xs text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800">
+                          <span className="font-bold mr-1">T{i + 1}</span>
+                          <span dangerouslySetInnerHTML={{ __html: desc }} />
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="mt-8 space-y-6 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900/60">
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Overview</h2>
         {role && (
@@ -176,7 +246,7 @@ export default async function HeroDetailPage({ params }: PageProps) {
         {lore && (
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Lore</h3>
-            <p className="mt-1 whitespace-pre-wrap text-zinc-700 dark:text-zinc-300 italic">"{lore}"</p>
+            <p className="mt-1 whitespace-pre-wrap text-zinc-700 dark:text-zinc-300 italic">&quot;{lore}&quot;</p>
           </div>
         )}
       </section>
