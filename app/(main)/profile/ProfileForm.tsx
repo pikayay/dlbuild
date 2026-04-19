@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { createSupabaseClient } from '@/lib/supabase/client'
+import Image from 'next/image'
 
-export default function ProfileForm({ user, profile }: { user: any, profile: any }) {
+export default function ProfileForm({ user, profile }: { user: { id: string }, profile: { bio?: string, avatar_url?: string } }) {
   const supabase = createSupabaseClient()
   const [bio, setBio] = useState(profile?.bio || '')
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || null)
@@ -25,8 +26,8 @@ export default function ProfileForm({ user, profile }: { user: any, profile: any
       })
       if (error) throw error
       setMessage('Profile updated successfully!')
-    } catch (error: any) {
-      setErrorMsg(error.message || 'Error updating profile')
+    } catch (error: unknown) {
+      setErrorMsg(error instanceof Error ? error.message : 'Error updating profile')
     } finally {
       setLoading(false)
     }
@@ -58,8 +59,8 @@ export default function ProfileForm({ user, profile }: { user: any, profile: any
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath)
       setAvatarUrl(data.publicUrl)
 
-    } catch (error: any) {
-      setErrorMsg(error.message || 'Error uploading avatar')
+    } catch (error: unknown) {
+      setErrorMsg(error instanceof Error ? error.message : 'Error uploading avatar')
     } finally {
       setUploading(false)
     }
@@ -73,7 +74,7 @@ export default function ProfileForm({ user, profile }: { user: any, profile: any
       <div className="flex flex-col sm:flex-row items-center gap-6">
         <div className="relative w-32 h-32 shrink-0 rounded-full overflow-hidden bg-gray-800 border-2 border-gray-700 shadow-inner">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="Avatar" className="object-cover w-full h-full" />
+            <Image src={avatarUrl} alt="Avatar" width={128} height={128} className="object-cover w-full h-full" />
           ) : (
             <div className="flex items-center justify-center w-full h-full text-gray-500 font-medium">No PFP</div>
           )}

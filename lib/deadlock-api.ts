@@ -65,6 +65,7 @@ export interface UpgradeItemV2 extends DeadlockItemBase {
   shop_image_webp?: string | null
   shop_image_small?: string | null
   shop_image_small_webp?: string | null
+  properties?: Record<string, unknown>
 }
 
 export type DeadlockItem = AbilityItemV2 | WeaponItemV2 | UpgradeItemV2

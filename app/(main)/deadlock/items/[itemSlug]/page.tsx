@@ -111,7 +111,11 @@ export default async function ItemDetailPage({ params }: PageProps) {
               </div>
               <div className="rounded-full bg-black/20 px-3 py-1 text-sm backdrop-blur-sm">
                 <dt className="sr-only">Tier</dt>
-                <dd>{item.item_tier}</dd>
+                <dd>Tier {item.item_tier}</dd>
+              </div>
+              <div className="rounded-full bg-black/20 px-3 py-1 text-sm backdrop-blur-sm">
+                <dt className="sr-only">Type</dt>
+                <dd>{item.is_active_item ? 'Active' : 'Passive'}</dd>
               </div>
               {item.cost != null && (
                 <div className="rounded-full bg-black/20 px-3 py-1 text-sm backdrop-blur-sm">
@@ -137,6 +141,41 @@ export default async function ItemDetailPage({ params }: PageProps) {
               </p>
             </div>
           ))}
+        </section>
+      )}
+
+      {item.properties && Object.keys(item.properties).length > 0 && (
+        <section className="mt-8 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900/60">
+          <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Stats & Properties</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {Object.entries(item.properties).map(([key, propValue]) => {
+              const prop = propValue as { label?: string, prefix?: string, postfix?: string, value?: string | number, icon?: string }
+              if (!prop.label) return null
+              const sign = prop.prefix === '{s:sign}' ? '+' : (prop.prefix || '')
+              const postfix = prop.postfix || ''
+              const val = prop.value !== undefined ? prop.value : ''
+              if (val === 0 || val === '0' || val === -1.0 || val === '-1.0') return null
+              return (
+                <div key={key} className="flex items-center gap-3 rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/50">
+                  {prop.icon ? (
+                    <div className="relative h-6 w-6 shrink-0 opacity-80">
+                      <Image src={prop.icon} alt="" fill className="object-contain" />
+                    </div>
+                  ) : (
+                    <div className="h-6 w-6 shrink-0 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      {prop.label}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {sign}{val}{postfix}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </section>
       )}
 

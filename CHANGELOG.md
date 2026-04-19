@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added active/passive tags and a "Stats & Properties" section to individual item pages, filtering out properties that don't increase stats (value is 0) or bugged API results (value is -1.0).
 - Added individual build pages at `/deadlock/builds/[id]`.
 - Updated the builds list page to link to individual builds.
 - Added ability for build owners to edit and update their existing builds.
