@@ -110,7 +110,7 @@ export default function MinimapPage() {
             {HOTSPOTS.map((hotspot) => (
               <div
                 key={hotspot.id}
-                className="absolute w-8 h-8 -ml-4 -mt-4 rounded-full cursor-pointer z-10 group"
+                className={`absolute w-8 h-8 -ml-4 -mt-4 rounded-full cursor-pointer group ${activeHotspot === hotspot.id ? 'z-50' : 'z-10'}`}
                 style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
                 onMouseEnter={() => setActiveHotspot(hotspot.id)}
                 onMouseLeave={() => setActiveHotspot(null)}
@@ -125,17 +125,17 @@ export default function MinimapPage() {
                 <AnimatePresence>
                   {activeHotspot === hotspot.id && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      initial={{ opacity: 0, y: hotspot.y < 25 ? -10 : 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      exit={{ opacity: 0, y: hotspot.y < 25 ? -10 : 10, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
                       // The tooltip itself is absolutely positioned relative to the hotspot dot
-                      className="absolute left-1/2 -translate-x-1/2 bottom-full mb-4 w-64 bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-4 pointer-events-none z-50 text-left"
+                      className={`absolute left-1/2 -translate-x-1/2 ${hotspot.y < 25 ? 'top-full mt-4' : 'bottom-full mb-4'} w-64 bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-4 pointer-events-none z-50 text-left`}
                     >
                       {/* Tooltip Triangle pointer (outer border) */}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-[8px] border-transparent border-t-gray-700" />
+                      <div className={`absolute left-1/2 -translate-x-1/2 border-[8px] border-transparent ${hotspot.y < 25 ? 'bottom-full -mb-[1px] border-b-gray-700' : 'top-full -mt-[1px] border-t-gray-700'}`} />
                       {/* Tooltip Triangle pointer (inner background) */}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[2px] border-[7px] border-transparent border-t-gray-900" />
+                      <div className={`absolute left-1/2 -translate-x-1/2 border-[7px] border-transparent ${hotspot.y < 25 ? 'bottom-full -mb-[2px] border-b-gray-900' : 'top-full -mt-[2px] border-t-gray-900'}`} />
                       
                       <h3 className="text-amber-400 font-bold text-lg mb-1">{hotspot.title}</h3>
                       <p className="text-gray-300 text-sm leading-relaxed">{hotspot.description}</p>
