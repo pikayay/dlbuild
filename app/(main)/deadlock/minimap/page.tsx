@@ -79,6 +79,34 @@ const HOTSPOTS: Hotspot[] = [
     y: 11.7,
     title: 'Shrine',
     description: 'Each base has two shrines on either side that protect the Patron from being attacked. These must be destroyed to damage the Patron, and knocking down both of them buffs the team\'s minions.',
+  },
+  {
+    id: 't1-camp',
+    x: 43,
+    y: 45.5,
+    title: 'Camp (Tier 1)',
+    description: 'A small camp of little creatures you can kill for souls. The number of lines under the triangle indicate camp size - 0, 1, and 2.',
+  },
+  {
+    id: 'sinners',
+    x: 62.7,
+    y: 45.4,
+    title: 'Sinner\'s Sacrifice',
+    description: 'A slot machine you can melee for souls. Hit it when all the lights are flashing for extra buffs!',
+  },
+  {
+    id: 'teleports',
+    x: 32.5,
+    y: 63.7,
+    title: 'Teleporters',
+    description: 'These are little teleporters in the subways. They link to the corresponding teleporter on the other half of the map, left->right and vice versa.',
+  },
+  {
+    id: 'shop',
+    x: 55.1,
+    y: 56.3,
+    title: 'Shop',
+    description: 'A place to buy items from. There\'s one by every lane guardian, one in each spawn, and two underground near the middle of the map.',
   }
 ];
 
